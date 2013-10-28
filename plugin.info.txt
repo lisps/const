@@ -1,0 +1,7 @@
+base   const
+author lisps
+email  
+date   2013-10-28
+name   const plugin
+desc   work on wiki pages with constants, self defined variables and make calculations
+url    
