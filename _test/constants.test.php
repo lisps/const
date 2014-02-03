@@ -6,7 +6,7 @@ class plugin_const_constants_test extends DokuWikiTest {
         parent::setup();
     }
 
-/*
+
     public function test_page_user_constants() {
         
         saveWikiText('test:plugin_const:pageconstants', 
@@ -29,7 +29,7 @@ class plugin_const_constants_test extends DokuWikiTest {
         $this->assertTrue(strpos($HTML, 'ID:pageconstants') !== false, 'Page ID is pageconstants');
         $this->assertTrue(strpos($HTML, 'NAMESPACE:test:plugin_const') !== false, 'Namespace is test:plugin_const');
         $this->assertTrue(strpos($HTML, 'User:') !== false, 'anonymous');
-    }*/
+    }
     
     public function test_date_constants() {
         
