@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @group plugin_const
+ * @group plugins
+ */
 class plugin_const_calculation_test extends DokuWikiTest {
 
     public function setup() {
@@ -7,7 +10,6 @@ class plugin_const_calculation_test extends DokuWikiTest {
         parent::setup();
     }
 
-    
     public function test_math() {
         saveWikiText('test:plugin_const:math', 
             '<const>'.DOKU_LF

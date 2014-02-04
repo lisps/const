@@ -19,37 +19,20 @@ require_once(DOKU_PLUGIN . 'action.php');
  */
 class action_plugin_const extends DokuWiki_Action_Plugin {
     /**
-     * return some info
+     * return variable 
      */
     private $autoindexer = 0;
-    private $invalidate = FALSE;
+
     
     /**
-     * offsets-at-character-position. recorded as tuples {charpos,offset}, where charpos is the
+     * offsets-at-character-position. recorded as tuples page:{charpos,offset}, where charpos is the
      * position in the MODIFIED data, not the position in the original data, and offset is the
      * CUMULATIVE offset at that position, not the offset relative to the previous location.
      */
-    var $offsets = array();
-	
-	/**
-	 * pagename for which calculation is made
-	 * 
-	 */
-	var $page = '';
-    
-    /**
-     * During the run, contains the original wiki data.
-     */
-    var $original;
-    
-    /**
-     * During the run, contains the modified wiki data.
-     */
-    var $wikified;
-    
+    private $offsets = array();
     
     //hook before rendering starts
-    function register(&$controller) {
+    function register($controller) {
         $controller->register_hook('PARSER_WIKITEXT_PREPROCESS', 'BEFORE', $this, '_doreplace');
         $controller->register_hook('PARSER_HANDLER_DONE', 'BEFORE', $this, '_fixsecedit');
         $controller->register_hook('PARSER_CACHE_USE', 'BEFORE', $this, '_cache_control');
@@ -67,10 +50,11 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
         require_once(dirname(__FILE__) . "/class.evalmath.php");
         $math = new evalmath();
         
-        $this->invalidate = FALSE;
+        $this->autoindexer = 0;
+        $invalidate = FALSE;
         
-        $this->original = $event->data;
-        $this->wikified = $this->original;
+        $original = $event->data;
+        $wikified = $original;
         
         //catch anonymous access
         $username=isset($_SERVER['REMOTE_USER'])?$_SERVER['REMOTE_USER']:"anonymous";
@@ -92,7 +76,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                     switch ($item[1]) {
                         case "%USER%":
                             $item[1] = $username;
-                            $this->invalidate = TRUE;
+                            $invalidate = TRUE;
                             break; //pagename
                         case "%ID%":
                             $item[1] = noNS(cleanID(getID()));
@@ -101,8 +85,8 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                             $item[1] = getNS(cleanID(getID()));
                             break; //namespace
                         case "%RANDOM%":
-                            $item[1]          = strval(rand());
-                            $this->invalidate = TRUE;
+                            $item[1] = strval(rand());
+                            $invalidate = TRUE;
                             break; //random number
                         case "%YEAR%":
                             $item[1] = date("Y");
@@ -114,16 +98,16 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                             $item[1] = date("F");
                             break; //current month
                         case "%WEEK%":
-                            $item[1]          = date("W");
-                            $this->invalidate = TRUE;
+                            $item[1] = date("W");
+                            $invalidate = TRUE;
                             break; //current week (iso)
                         case "%DAY%":
-                            $item[1]          = date("d");
-                            $this->invalidate = TRUE;
+                            $item[1] = date("d");
+                            $invalidate = TRUE;
                             break; //current day
                         case "%DAYNAME%":
-                            $item[1]          = date("l");
-                            $this->invalidate = TRUE;
+                            $item[1]  = date("l");
+                            $invalidate = TRUE;
                             break; //current day
                         case "%AUTOINDEX%":
                             $item[1] = "%%INDEX#" . (++$autoindex) . "%%"; //special automatic indexer
@@ -134,15 +118,15 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                     } 
                     
                     //replace in wiki
-                    $this->wikified = str_replace("%%" . trim($item[0]) . "%%", $item[1], $this->wikified);
-					
-					//load evaluator
-					@$math->evaluate($item[0]."=".$item[1]);
+                    $wikified = str_replace("%%" . trim($item[0]) . "%%", $item[1], $wikified);
+                    
+                    //load evaluator
+                    @$math->evaluate($item[0]."=".$item[1]);
                 } else {
                     //evaluate expression
                     $item = explode(":", $entry);
                     if (count($item) === 2) {
-                        $this->wikified = str_replace("%%" . trim($item[0]) . "%%", @$math->evaluate($item[1]), $this->wikified);
+                        $wikified = str_replace("%%" . trim($item[0]) . "%%", @$math->evaluate($item[1]), $wikified);
                     }
                 }
             }
@@ -151,39 +135,39 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
             while ($autoindex > 0) {
                 $this->autoindexer = 1;
                 //replace all
-                $this->wikified    = preg_replace_callback("|%%INDEX#" . $autoindex . "%%|", array(
+                $wikified    = preg_replace_callback("|%%INDEX#" . $autoindex . "%%|", array(
                     $this,
                     "_replacecallback"
-                ), $this->wikified);
+                ), $wikified);
                 $autoindex--;
             }
             
-            $event->data = $this->wikified;
+            $event->data = $wikified;
             
-            $this->original = explode("\n", $this->original);
-            $this->wikified = explode("\n", $this->wikified);
+            $original = explode("\n", $original);
+            $wikified = explode("\n", $wikified);
             
+            
+            $this->offsets[$ID] = array();
             // fill offset array to deal with section editing issues
-            for ($l = 0; $l < count($this->wikified); $l++) {
+            for ($l = 0; $l < count($wikified); $l++) {
                 // record offsets at the start of this line
-                $this->offsets[] = array(
+                $this->offsets[$ID][] = array(
                     'pos' => $char_pos,
                     'offset' => $text_offset
                 );
                 // calculate position / offset for next line
-                $char_pos += strlen($this->wikified[$l]) + 1;
-                $text_offset += strlen($this->wikified[$l]) - strlen($this->original[$l]);
+                $char_pos += strlen($wikified[$l]) + 1;
+                $text_offset += strlen($wikified[$l]) - strlen($original[$l]);
                 //echo '(' . $char_pos . '/' . $text_offset . ')' . ' ';
             }
         }
-        
-        unset($this->original);
-        unset($this->wikified);
+
         
         //save invalidation info to metadata            
         p_set_metadata($ID, array(
             'plugin_const' => array(
-                'invalidate' => $this->invalidate
+                'invalidate' => $invalidate
             )
         ), FALSE, TRUE);
     }
@@ -216,10 +200,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
      * in the original data, not the modified data. 
      */
     function _fixsecedit(&$event, $param) {
-		global $ID;
-		if($ID != $this->page) return;
-        
-		$calls =& $event->data->calls;
+        $calls =& $event->data->calls;
         $count = count($calls);
 
         // iterate through the instruction list and set the file offset values
@@ -231,10 +212,10 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
             if ($calls[$i][0] == 'header') {
                 $calls[$i][1][2] = $this->_convert($calls[$i][1][2]);
             }
-			// be aware of headernofloat plugin
-			if ($calls[$i][0] == 'plugin' && $calls[$i][1][0] == 'headernofloat') {
+            // be aware of headernofloat plugin
+            if ($calls[$i][0] == 'plugin' && $calls[$i][1][0] == 'headernofloat') {
                 $calls[$i][1][1]['pos'] = $this->_convert($calls[$i][1][1]['pos']);
-				$calls[$i][2] = $this->_convert($calls[$i][2]);
+                $calls[$i][2] = $this->_convert($calls[$i][2]);
             }
         }
     }
@@ -243,9 +224,11 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
      * Convert modified raw wiki offset value pos back to the unmodified value
      */
     function _convert($pos) {
+        global $ID;
+        if(!array_key_exists($ID,$this->offsets)) return $pos;
         // find the offset that applies to this character position
         $offset = 0;
-        foreach ($this->offsets as $tuple) {
+        foreach ($this->offsets[$ID] as $tuple) {
             if ($pos >= $tuple['pos']) {
                 $offset = $tuple['offset'];
             } else {
