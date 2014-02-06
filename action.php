@@ -32,7 +32,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
     private $offsets = array();
     
     //hook before rendering starts
-    function register($controller) {
+    function register( Doku_Event_Handler $controller) {
         $controller->register_hook('PARSER_WIKITEXT_PREPROCESS', 'BEFORE', $this, '_doreplace');
         $controller->register_hook('PARSER_HANDLER_DONE', 'BEFORE', $this, '_fixsecedit');
         $controller->register_hook('PARSER_CACHE_USE', 'BEFORE', $this, '_cache_control');
