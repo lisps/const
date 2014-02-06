@@ -51,7 +51,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
         $math = new evalmath();
         
         $this->autoindexer = 0;
-        $invalidate = FALSE;
+        $invalidate = false;
         
         $original = $event->data;
         $wikified = $original;
@@ -61,7 +61,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
         
         //get const definitions
         $data = array();
-        if (preg_match('§<const[^>]*>([^<]*)</const>§', $event->data, $data) > 0) {
+        if (preg_match('ï¿½<const[^>]*>([^<]*)</const>ï¿½', $event->data, $data) > 0) {
             //split entries
             $data = array_pop($data);
             $data = preg_split('/[\r\n]+/', $data, -1, PREG_SPLIT_NO_EMPTY);
@@ -76,7 +76,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                     switch ($item[1]) {
                         case "%USER%":
                             $item[1] = $username;
-                            $invalidate = TRUE;
+                            $invalidate = true;
                             break; //pagename
                         case "%ID%":
                             $item[1] = noNS(cleanID(getID()));
@@ -86,7 +86,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                             break; //namespace
                         case "%RANDOM%":
                             $item[1] = strval(rand());
-                            $invalidate = TRUE;
+                            $invalidate = true;
                             break; //random number
                         case "%YEAR%":
                             $item[1] = date("Y");
@@ -99,15 +99,15 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                             break; //current month
                         case "%WEEK%":
                             $item[1] = date("W");
-                            $invalidate = TRUE;
+                            $invalidate = true;
                             break; //current week (iso)
                         case "%DAY%":
                             $item[1] = date("d");
-                            $invalidate = TRUE;
+                            $invalidate = true;
                             break; //current day
                         case "%DAYNAME%":
                             $item[1]  = date("l");
-                            $invalidate = TRUE;
+                            $invalidate = true;
                             break; //current day
                         case "%AUTOINDEX%":
                             $item[1] = "%%INDEX#" . (++$autoindex) . "%%"; //special automatic indexer
@@ -169,7 +169,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
             'plugin_const' => array(
                 'invalidate' => $invalidate
             )
-        ), FALSE, TRUE);
+        ), false, true);
     }
     
     /**
@@ -180,13 +180,13 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
         
         $cache =& $event->data;
         
-        if ((isset($cache->page) == TRUE) && ($cache->mode == "i")) {
+        if ((isset($cache->page) === true) && ($cache->mode === "i")) {
             //cache purge requested?
             $const = p_get_metadata($cache->page, 'plugin_const');
             
             //force initial purge
             if (!isset($const['invalidate'])) {
-                $const['invalidate'] = TRUE;
+                $const['invalidate'] = true;
             }
             
             $cache->depends["purge"] = $const["invalidate"];
@@ -206,14 +206,14 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
         // iterate through the instruction list and set the file offset values
         // back to the values they would be if no const syntax has been added by this plugin
         for ($i = 0; $i < $count; $i++) {
-            if ($calls[$i][0] == 'section_open' || $calls[$i][0] == 'section_close' || $calls[$i][0] == 'header' || $calls[$i][0] == 'p_open') {
+            if ($calls[$i][0] === 'section_open' || $calls[$i][0] === 'section_close' || $calls[$i][0] === 'header' || $calls[$i][0] === 'p_open') {
                 $calls[$i][2] = $this->_convert($calls[$i][2]);
             }
-            if ($calls[$i][0] == 'header') {
+            if ($calls[$i][0] === 'header') {
                 $calls[$i][1][2] = $this->_convert($calls[$i][1][2]);
             }
             // be aware of headernofloat plugin
-            if ($calls[$i][0] == 'plugin' && $calls[$i][1][0] == 'headernofloat') {
+            if ($calls[$i][0] === 'plugin' && $calls[$i][1][0] === 'headernofloat') {
                 $calls[$i][1][1]['pos'] = $this->_convert($calls[$i][1][1]['pos']);
                 $calls[$i][2] = $this->_convert($calls[$i][2]);
             }
