@@ -61,7 +61,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
         
         //get const definitions
         $data = array();
-        if (preg_match('§<const[^>]*>([^<]*)</const>§', $event->data, $data) > 0) {
+        if (preg_match('/<const[^>]*>([^<]*)<\/const>/', $event->data, $data) > 0) {
             //split entries
             $data = array_pop($data);
             $data = preg_split('/[\r\n]+/', $data, -1, PREG_SPLIT_NO_EMPTY);
