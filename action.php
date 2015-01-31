@@ -206,17 +206,28 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
         // iterate through the instruction list and set the file offset values
         // back to the values they would be if no const syntax has been added by this plugin
         for ($i = 0; $i < $count; $i++) {
-            if ($calls[$i][0] === 'section_open' || $calls[$i][0] === 'section_close' || $calls[$i][0] === 'header' || $calls[$i][0] === 'p_open') {
+            if (in_array($calls[$i][0],array(
+            		'section_open', 
+            		'section_close', 
+            		'header', 
+            		'p_open',
+            		//'table_close',
+            		//'table_open',
+            	))) {
                 $calls[$i][2] = $this->_convert($calls[$i][2]);
             }
-            if ($calls[$i][0] === 'header') {
+            if (in_array($calls[$i][0],array('header','table_open'))) {
                 $calls[$i][1][2] = $this->_convert($calls[$i][1][2]);
+            }
+            if(in_array($calls[$i][0],array('table_close'))) {
+            	$calls[$i][1][0] = $this->_convert($calls[$i][1][0]);
             }
             // be aware of headernofloat plugin
             if ($calls[$i][0] === 'plugin' && $calls[$i][1][0] === 'headernofloat') {
                 $calls[$i][1][1]['pos'] = $this->_convert($calls[$i][1][1]['pos']);
                 $calls[$i][2] = $this->_convert($calls[$i][2]);
             }
+            //if($calls[$i][0] == 'table_close')
         }
     }
     
