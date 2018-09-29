@@ -99,7 +99,7 @@
 			'tan','tanh','arctan','atan','arctanh','atanh',
 			'sqrt','abs','ln','log');
 
-		function EvalMath() {
+		function __construct() {
 			// make the variables a little more accurate
 			$this->v['pi'] = pi();
 			$this->v['e'] = exp(1);
