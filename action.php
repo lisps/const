@@ -128,6 +128,16 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                         case "%AUTOINDEX%":
                             $item[1] = "%%INDEX#" . (++$autoindex) . "%%"; //special automatic indexer
                             break;
+                        case "%REVISION%":
+                            $tmp_info = pageinfo();
+                            $item[1]  = $tmp_info['lastmod'];
+                            $invalidate = true;
+                            break; //current revision number (unix timestamp)
+                        case "%LASTMOD%":
+                            $tmp_info = pageinfo();
+                            $item[1]  = strftime("%Y%m%d_%H%M%S", $tmp_info['lastmod']);
+                            $invalidate = true;
+                            break; //last modification date
                         default:
                             $item[1] = trim($item[1]);
                             break;
