@@ -1,7 +1,7 @@
 base   const
 author lisps, peterfromearth
 email  coder@peterfromearth.de
-date   2018-09-29
+date   2020-02-29
 name   const plugin
 desc   work on wiki pages with constants, self defined variables and make calculations
 url    https://www.dokuwiki.org/plugin:const
