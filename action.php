@@ -109,9 +109,33 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                             $item[1]  = date("l");
                             $invalidate = true;
                             break; //current day
+                        case "%HOUR%":
+                            $item[1]  = date("H");
+                            $invalidate = true;
+                            break; //current hour
+                        case "%MINUTE%":
+                            $item[1]  = date("i");
+                            $invalidate = true;
+                            break; //current minute
+                        case "%SECOND%":
+                            $item[1]  = date("s");
+                            $invalidate = true;
+                            break; //current second
+                        case "%UNIXEPOCH%":
+                            $item[1]  = date("U");
+                            $invalidate = true;
+                            break; //current unix timestamp
                         case "%AUTOINDEX%":
                             $item[1] = "%%INDEX#" . (++$autoindex) . "%%"; //special automatic indexer
                             break;
+                        case "%REVISION%":
+                            $tmp_info = pageinfo();
+                            $item[1]  = $tmp_info['lastmod'];
+                            break; //current revision number (unix timestamp)
+                        case "%LASTMOD%":
+                            $tmp_info = pageinfo();
+                            $item[1]  = strftime("%Y%m%d_%H%M%S", $tmp_info['lastmod']);
+                            break; //last modification date
                         default:
                             $item[1] = trim($item[1]);
                             break;
