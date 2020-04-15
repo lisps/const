@@ -70,7 +70,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
             $autoindex = 0;
             foreach ($data as $entry) {
                 //normal const
-                $item = explode("=", trim($entry));
+                $item = explode("=", trim($entry), 2);
                 if (count($item) === 2) {
                     //special string-replace
                     switch ($item[1]) {
