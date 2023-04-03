@@ -145,12 +145,12 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                     $wikified = str_replace("%%" . trim($item[0]) . "%%", $item[1], $wikified);
                     
                     //load evaluator
-                    @$math->evaluate($item[0]."=".$item[1]);
+                    @$math->assign_and_evaluate($item[0]."=".$item[1]);
                 } else {
                     //evaluate expression
                     $item = explode(":", $entry);
                     if (count($item) === 2) {
-                        $wikified = str_replace("%%" . trim($item[0]) . "%%", @$math->evaluate($item[1]), $wikified);
+                        $wikified = str_replace("%%" . trim($item[0]) . "%%", @$math->assign_and_evaluate($item[1]), $wikified);
                     }
                 }
             }
