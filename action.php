@@ -63,6 +63,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
         $data = array();
         if (preg_match('/<const[^>]*>([^<]*)<\/const>/', $event->data, $data) > 0) {
             //split entries
+            //var_dump($data);exit;
             $data = array_pop($data);
             $data = preg_split('/[\r\n]+/', $data, -1, PREG_SPLIT_NO_EMPTY);
             
@@ -143,6 +144,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                     
                     //replace in wiki
                     $wikified = str_replace("%%" . trim($item[0]) . "%%", $item[1], $wikified);
+                    $wikified = str_replace("§§" . trim($item[0]) . "§§", $item[1], $wikified);
                     
                     //load evaluator
                     @$math->assign_and_evaluate($item[0]."=".$item[1]);
@@ -151,6 +153,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
                     $item = explode(":", $entry);
                     if (count($item) === 2) {
                         $wikified = str_replace("%%" . trim($item[0]) . "%%", @$math->assign_and_evaluate($item[1]), $wikified);
+                        $wikified = str_replace("§§" . trim($item[0]) . "§§", @$math->assign_and_evaluate($item[1]), $wikified);
                     }
                 }
             }
