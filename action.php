@@ -204,6 +204,7 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
      */
     function _cache_control(&$event, $param) {
         global $conf;
+	global $ID;
         
         $cache =& $event->data;
         
@@ -212,6 +213,15 @@ class action_plugin_const extends DokuWiki_Action_Plugin {
             $const = p_get_metadata($cache->page, 'plugin_const');
             
             //force initial purge
+	    if (is_string($const)) {
+		    // something went wrong in the cache, fix the cache value
+		    // and force invalidate for the time being
+		    $const = array(
+		    	'invalidate' => true
+		    );
+
+		    p_set_metadata($ID, array( 'plugin_const' => $const), false, true);
+	    }
             if (!isset($const['invalidate'])) {
                 $const['invalidate'] = true;
             }
